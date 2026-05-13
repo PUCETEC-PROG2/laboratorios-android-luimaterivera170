@@ -1,8 +1,8 @@
 # Laboratorio Android. Cliente de GitHub
 
 ## Datos del estudiante
-- [Nombre del estudiante]
-- [Carrera]
+- Mateo Rivera
+- PUCETEC - Desarrollo de Sotfware
 
 ## Descripción del Proyecto
 Este proyecto es una serie de laboratorios para estudiantes donde se implementará una aplicación Android que funciona como cliente de GitHub utilizando Jetpack Compose. La aplicación evoluciona progresivamente desde una UI estática hasta una integración completa con la API REST de GitHub.
