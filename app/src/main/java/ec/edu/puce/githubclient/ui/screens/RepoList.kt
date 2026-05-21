@@ -1,42 +1,61 @@
 package ec.edu.puce.githubclient.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ec.edu.puce.githubclient.ui.components.RepoItem
+import ec.edu.puce.githubclient.viewmodels.RepoListViewModel
 
 @Composable
 fun RepoList (
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: RepoListViewModel = viewModel()
 ){
-    Column(
-        modifier = modifier
-    ){
-        RepoItem(
-            name = "Repositorio de Android",
-            description = "Repositorio creado en Kotlin para Desarrollo Mobil",
-            avatarUrl = "https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fes.wikipedia.org%2Fwiki%2FArchivo%3ABarcelona_Sporting_Club_Logo.png&ved=0CBYQjRxqFwoTCLDRvKiSt5QDFQAAAAAdAAAAABAF&opi=89978449",
-            language = "Kotlin"
-        )
-        RepoItem(
-            name = "Repositorio de Android",
-            description = "Repositorio creado en Python para Desarrollo Mobil",
-            avatarUrl = "https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fes.wikipedia.org%2Fwiki%2FArchivo%3ABarcelona_Sporting_Club_Logo.png&ved=0CBYQjRxqFwoTCLDRvKiSt5QDFQAAAAAdAAAAABAF&opi=89978449",
-            language = "Python"
-        )
-        RepoItem(
-            name = "Repositorio de Android",
-            description = "Repositorio creado en React para Desarrollo Mobil",
-            avatarUrl = "https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fes.wikipedia.org%2Fwiki%2FArchivo%3ABarcelona_Sporting_Club_Logo.png&ved=0CBYQjRxqFwoTCLDRvKiSt5QDFQAAAAAdAAAAABAF&opi=89978449",
-            language = "React"
-        )
-        RepoItem(
-            name = "Repositorio de Android",
-            description = "Repositorio creado en Javascri´t para Desarrollo Mobil",
-            avatarUrl = "https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fes.wikipedia.org%2Fwiki%2FArchivo%3ABarcelona_Sporting_Club_Logo.png&ved=0CBYQjRxqFwoTCLDRvKiSt5QDFQAAAAAdAAAAABAF&opi=89978449",
-            language = "Java"
-        )
+    val repos by viewModel.repos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val errorMsg by viewModel.errorMsg.collectAsState()
+
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        errorMsg?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Center)
+                    .padding(16.dp)
+            )
+        }
+
+        if (!isLoading && errorMsg.isNullOrBlank()){
+            LazyColumn (modifier = Modifier.fillMaxSize()) {
+                items(repos.size) {i ->
+                    RepoItem(repos[i])
+                }
+            }
+        }
     }
 }
+
+
 // HOLA A TODOS

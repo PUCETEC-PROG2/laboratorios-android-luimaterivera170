@@ -19,15 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-
+import ec.edu.puce.githubclient.models.GithubUser
+import ec.edu.puce.githubclient.models.Repository
 
 
 @Composable
 fun RepoItem(
-    name: String,
-    description: String,
-    avatarUrl: String,
-    language: String?
+    repository: Repository
 ) {
 
     Card (
@@ -41,8 +39,8 @@ fun RepoItem(
                 .padding( all = 16.dp)
         ) {
             AsyncImage(
-                model = avatarUrl,
-                contentDescription = "Imagen de repositorio",
+                model = repository.owner.avatarUrl,
+                contentDescription = "Imagen de ${repository.name}",
                 modifier = Modifier.size(size = 60.dp),
                 contentScale = ContentScale.Crop,
             )
@@ -51,21 +49,22 @@ fun RepoItem(
 
             Column {
                 Text(
-                    text = name,
+                    text = repository.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height( height = 4.dp))
 
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                if (!language.isNullOrBlank()) {
+                if (!repository.description.isNullOrBlank()) {
                     Text(
-                        text =  language,
+                        text = repository.description,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                if (!repository.language.isNullOrBlank()) {
+                    Text(
+                        text =  repository.language,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -77,10 +76,16 @@ fun RepoItem(
 @Preview(showBackground = true)
 @Composable
 fun RepoItemPreview (){
-    RepoItem(
+    val repository = Repository (
+        id = "12345",
         name = "Repositorio de Android",
-        description = "Repositorio creado en Kotlin para Desarrollo Mobil",
-        avatarUrl = "Barcelona",
-        language = "Kotlin"
+        description = "Reposiorio de Android para el paralelo 1471",
+        language = "Kotlin",
+        owner = GithubUser (
+            id = "123",
+            login = "mateoriveraescalante",
+            avatarUrl = "https://i.pinimg.com/1200x/0d/a0/90/0da09059eadd3bc3940e25485f096cad.jpg"
+        )
     )
+    RepoItem(repository)
 }
