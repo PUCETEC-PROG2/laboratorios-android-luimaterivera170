@@ -26,6 +26,8 @@ object RetrofitClient {
                 .addHeader("Pragma", "no-cache")
                 .addHeader("Expires", "0")
                 .addHeader("Connection", "close")
+                .addHeader("Accept", "application/vnd.github+json")
+                .addHeader("X-GitHub-Api-Version", "2022-11-28")
                 .build()
 
 
