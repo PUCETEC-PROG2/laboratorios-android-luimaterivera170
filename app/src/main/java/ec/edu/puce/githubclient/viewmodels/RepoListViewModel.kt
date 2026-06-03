@@ -1,5 +1,5 @@
 package ec.edu.puce.githubclient.viewmodels
-
+import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ec.edu.puce.githubclient.models.Repository
@@ -9,30 +9,47 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RepoListViewModel : ViewModel() {
-    private  val _repos = MutableStateFlow<List<Repository>>(emptyList())
-    val  repos : StateFlow<List<Repository>> = _repos.asStateFlow()
+class RepoListViewModel : ViewModel(){
+    private val _repos= MutableStateFlow<List<Repository>>(emptyList())
+    val repos: StateFlow<List<Repository>> = _repos.asStateFlow()
 
-    private  val _isLoading = MutableStateFlow(false)
-    val isLoading : StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _isloading = MutableStateFlow(value = false)
+    val isloading : StateFlow<Boolean> = _isloading.asStateFlow()
+
     private val _errorMsg = MutableStateFlow<String?>(null)
+
     val errorMsg : StateFlow<String?> = _errorMsg.asStateFlow()
 
     init {
         fetchRepos()
     }
 
-    fun fetchRepos () {
+    fun fetchRepos (){
         viewModelScope.launch {
-            _isLoading.value = true
+            _isloading.value = true
             _errorMsg.value = null
-            try {
+            try{
                 _repos.value = RetrofitClient.apiService.getRepositories()
             } catch (e: Exception) {
-                _errorMsg.value = "Error al cargar repositorio: ${e.localizedMessage}"
+                _errorMsg.value = "Error al cargar repositorios: ${e.localizedMessage}"
             } finally {
-                _isLoading.value = false
+                _isloading.value = false
             }
         }
     }
+
+    fun deleteRepo(owner: String, repoName: String) {
+        viewModelScope.launch {
+            _isloading.value = true
+            _errorMsg.value = null
+            try {
+                RetrofitClient.apiService.deleteRepository(owner, repoName)
+                fetchRepos()
+            } catch (e: Exception) {
+                _errorMsg.value = "Error al eliminar el repositorio: ${e.localizedMessage}"
+                _isloading.value = false
+            }
+        }
+    }
+
 }

@@ -1,5 +1,6 @@
 package ec.edu.puce.githubclient.services
 
+
 import ec.edu.puce.githubclient.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -14,11 +15,10 @@ object RetrofitClient {
     }
 
     private val httpClient = OkHttpClient.Builder()
-        .addInterceptor(interceptor = logging)
+        .addInterceptor(interceptor =logging)
         .addInterceptor { chain ->
             val token = BuildConfig.GITHUB_TOKEN
             println("Token: $token")
-
 
             val request = chain.request().newBuilder()
                 .addHeader("Authorization", "Bearer $token")
@@ -26,16 +26,12 @@ object RetrofitClient {
                 .addHeader("Pragma", "no-cache")
                 .addHeader("Expires", "0")
                 .addHeader("Connection", "close")
-                .addHeader("Accept", "application/vnd.github+json")
-                .addHeader("X-GitHub-Api-Version", "2022-11-28")
                 .build()
 
-
-
             chain.proceed(request)
+
         }
         .build()
-
     val apiService: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -44,5 +40,7 @@ object RetrofitClient {
             .build()
             .create(ApiService::class.java)
     }
+
 }
-//hola
+
+

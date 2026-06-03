@@ -9,16 +9,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RepoFormViewModel: ViewModel() {
-    private  val _isLoading = MutableStateFlow(false)
+class RepoFormViewModel : ViewModel() {
+    private val _isLoading = MutableStateFlow(value = false)
     val isLoading : StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _errorMsg = MutableStateFlow<String?>(null)
     val errorMsg : StateFlow<String?> = _errorMsg.asStateFlow()
+
     private val _isSuccess = MutableStateFlow(false)
-    val isSuccess : StateFlow<Boolean> = _isSuccess.asStateFlow()
+    val isSuccess : StateFlow<Boolean?> = _isSuccess.asStateFlow()
 
 
-    fun createRepo (name: String, description: String) {
+
+    fun createRepo (name: String, description: String){
         viewModelScope.launch {
             _isLoading.value = true
             _errorMsg.value = null
@@ -26,8 +29,25 @@ class RepoFormViewModel: ViewModel() {
                 val repoBody = RepositoryPayload(name, description)
                 RetrofitClient.apiService.createRepository(repoBody)
                 _isSuccess.value = true
-            } catch (e: Exception){
-                _errorMsg.value = "Error al cargar repositorio: ${e.localizedMessage}"
+            } catch (e: Exception) {
+                _errorMsg.value = "Error al cargar el repositorio: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+
+    }
+
+    fun updateRepo(originalOwner: String, originalName: String, newName: String, newDescription: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMsg.value = null
+            try {
+                val repoBody = RepositoryPayload(newName, newDescription)
+                RetrofitClient.apiService.updateRepository(originalOwner, originalName, repoBody)
+                _isSuccess.value = true
+            } catch (e: Exception) {
+                _errorMsg.value = "Error al actualizar el repositorio: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }
@@ -38,7 +58,8 @@ class RepoFormViewModel: ViewModel() {
         _isSuccess.value = false
     }
 
-    fun resetError (){
+    fun resetError() {
         _errorMsg.value = null
     }
+
 }
