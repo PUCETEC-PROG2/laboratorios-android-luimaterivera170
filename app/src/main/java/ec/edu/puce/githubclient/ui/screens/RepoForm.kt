@@ -1,6 +1,6 @@
 package ec.edu.puce.githubclient.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement //
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,8 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,27 +32,24 @@ import ec.edu.puce.githubclient.ui.theme.GithubClientTheme
 import ec.edu.puce.githubclient.viewmodels.RepoFormViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import ec.edu.puce.githubclient.models.Repository
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RepoForm(
-    repository: Repository? = null,
     onBackClick: () -> Unit = {},
     onSaveSuccess: () -> Unit = {},
     viewModel: RepoFormViewModel = viewModel()
 ) {
+    // Escuchamos de forma reactiva el estado del ViewModel
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMsg by viewModel.errorMsg.collectAsState()
     val isSuccess by viewModel.isSuccess.collectAsState()
 
-    val isEditMode = repository != null
-
-    var name by remember { mutableStateOf(repository?.name ?: "") }
-    var description by remember { mutableStateOf(repository?.description ?: "") }
+    // 🔥 Recolectamos los textos en tiempo real desde el flujo del ViewModel
+    val name by viewModel.nameInput.collectAsState()
+    val description by viewModel.descriptionInput.collectAsState()
+    val isEditMode = viewModel.isEditing
 
     LaunchedEffect(isSuccess) {
         if (isSuccess == true) {
@@ -62,7 +57,6 @@ fun RepoForm(
             viewModel.resetSuccess()
         }
     }
-
 
     Scaffold(
         topBar = {
@@ -104,7 +98,8 @@ fun RepoForm(
             } else {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    // Actualizamos el flujo directamente en el ViewModel
+                    onValueChange = { viewModel.nameInput.value = it },
                     label = { Text("Nombre del repositorio") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -112,7 +107,8 @@ fun RepoForm(
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = description,
-                    onValueChange = {description = it},
+                    // Actualizamos el flujo directamente en el ViewModel
+                    onValueChange = { viewModel.descriptionInput.value = it },
                     label = { Text("Descripción del repositorio") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 5
@@ -122,9 +118,10 @@ fun RepoForm(
                 Button(
                     onClick = {
                         if (isEditMode) {
+                            // Ejecuta la actualización usando las referencias guardadas en el setRepository
                             viewModel.updateRepo(
-                                originalOwner = repository?.owner?.login ?: "",
-                                originalName = repository?.name ?: "",
+                                originalOwner = viewModel.originalOwner,
+                                originalName = viewModel.originalName,
                                 newName = name,
                                 newDescription = description
                             )
@@ -139,7 +136,7 @@ fun RepoForm(
                         contentDescription = "Guardar"
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text("Guardar")
+                    Text(if (isEditMode) "Actualizar" else "Guardar")
                 }
             }
         }

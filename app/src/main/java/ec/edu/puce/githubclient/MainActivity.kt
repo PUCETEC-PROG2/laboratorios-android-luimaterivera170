@@ -24,17 +24,27 @@ class MainActivity : ComponentActivity() {
                 var currentScreen by remember { mutableStateOf("repoList") }
                 val listViewModel: RepoListViewModel = viewModel()
                 val formViewModel: RepoFormViewModel = viewModel()
+
                 when (currentScreen) {
                     "repoList" -> RepoList(
-                        onNavigateToForm = {
+                        viewModel = listViewModel, // Usamos la misma instancia compartida
+                        onNavigateToForm = { repoSelected ->
                             formViewModel.resetError()
+
+                            // 🔥 LA CLAVE AQUÍ:
+                            // Pasamos el repositorio seleccionado al ViewModel del Formulario.
+                            // Si 'repoSelected' es null, el formulario se limpia para CREAR.
+                            // Si tiene datos, el formulario se rellena para EDITAR.
+                            formViewModel.setRepository(repoSelected)
+
                             currentScreen = "repoForm"
                         }
                     )
                     "repoForm" -> RepoForm(
-                        onBackClick = { currentScreen = "repoList"},
-                        onSaveSuccess =  {
-                            listViewModel.fetchRepos()
+                        viewModel = formViewModel, // Nos aseguramos de pasarle el ViewModel
+                        onBackClick = { currentScreen = "repoList" },
+                        onSaveSuccess = {
+                            listViewModel.fetchRepos() // Recarga la lista para ver los cambios
                             currentScreen = "repoList"
                         }
                     )
@@ -43,6 +53,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-// Hola
-

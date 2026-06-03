@@ -2,6 +2,7 @@ package ec.edu.puce.githubclient.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ec.edu.puce.githubclient.models.Repository
 import ec.edu.puce.githubclient.models.RepositoryPayload
 import ec.edu.puce.githubclient.services.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,11 +18,37 @@ class RepoFormViewModel : ViewModel() {
     val errorMsg : StateFlow<String?> = _errorMsg.asStateFlow()
 
     private val _isSuccess = MutableStateFlow(false)
-    val isSuccess : StateFlow<Boolean?> = _isSuccess.asStateFlow()
+    val isSuccess : StateFlow<Boolean> = _isSuccess.asStateFlow()
 
+    // Variables para saber qué repositorio estamos editando
+    var isEditing = false
+    var originalOwner = ""
+    var originalName = ""
 
+    // Estados para los campos de texto que leerá tu RepoForm
+    val nameInput = MutableStateFlow("")
+    val descriptionInput = MutableStateFlow("")
 
-    fun createRepo (name: String, description: String){
+    // 🔥 ESTA ES LA FUNCIÓN QUE BORRARÁ EL ROJO DE MAINACTIVITY:
+    fun setRepository(repository: Repository?) {
+        if (repository != null) {
+            // Modo Edición: Llenamos los datos con el repo seleccionado
+            isEditing = true
+            originalOwner = repository.owner.login
+            originalName = repository.name
+            nameInput.value = repository.name
+            descriptionInput.value = repository.description ?: ""
+        } else {
+            // Modo Creación: Limpiamos todo para que aparezca vacío
+            isEditing = false
+            originalOwner = ""
+            originalName = ""
+            nameInput.value = ""
+            descriptionInput.value = ""
+        }
+    }
+
+    fun createRepo(name: String, description: String){
         viewModelScope.launch {
             _isLoading.value = true
             _errorMsg.value = null
@@ -35,7 +62,6 @@ class RepoFormViewModel : ViewModel() {
                 _isLoading.value = false
             }
         }
-
     }
 
     fun updateRepo(originalOwner: String, originalName: String, newName: String, newDescription: String) {
@@ -61,5 +87,4 @@ class RepoFormViewModel : ViewModel() {
     fun resetError() {
         _errorMsg.value = null
     }
-
 }
